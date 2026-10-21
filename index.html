@@ -95,7 +95,9 @@
         </button>
       </div>
     </div>
-
+<button onclick="selectWeakCourse()" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-rose-900 text-rose-100 hover:bg-rose-800 shadow-sm flex items-center gap-1.5">
+  <span>📌 Zayıf Sorularım (Yanlışlar)</span>
+</button>
     <!-- Canlı İstatistik Çubuğu -->
     <div class="max-w-7xl mx-auto px-4 py-2 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
       <div class="flex items-center gap-3 flex-wrap">
@@ -1164,7 +1166,25 @@ function importCustomCourse() {
         sorular: formattedQuestions
       };
     }
+function selectWeakCourse() {
+  // Tüm derslerde yanlış yapılan soruları tek bir havuzda topla
+  let allWrongs = [];
+  Object.keys(courses).forEach(key => {
+    if (key === "weak_pool") return;
+    const c = courses[key];
+    const wrongs = c.sorular.filter(q => userAnswers[q.id] && userAnswers[q.id] !== q.cevap);
+    allWrongs = allWrongs.concat(wrongs);
+  });
 
+  courses["weak_pool"] = {
+    ders_kodu: "weak_pool",
+    ders_adi: "Zayıf Olduğum / Yanlış Yaptığım Sorular",
+    kisa_ad: "Zayıf Sorularım",
+    sorular: allWrongs
+  };
+
+  selectCourse("weak_pool");
+}
     // Özel dersleri kaydet
     const savedCustom = JSON.parse(localStorage.getItem("auzef_custom_courses_v2") || "{}");
     savedCustom[key] = courses[key];
