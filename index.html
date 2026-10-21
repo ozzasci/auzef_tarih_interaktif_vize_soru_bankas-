@@ -54,6 +54,9 @@
         <button onclick="resetProgress()" class="px-3 py-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-600 text-xs font-semibold transition">
           Sıfırla
         </button>
+        <button onclick="openStatsModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow-sm">
+  📊 İstatistik
+</button>
       </div>
     </div>
   </header>
@@ -1403,7 +1406,58 @@ function answerPopupQuestion(selectedKey) {
     : `✗ Yanlış oldu. Doğru cevap: ${q.cevap}) ${q.siklar[q.cevap]}`;
   feedbackBox.classList.remove("hidden");
 }
+function openStatsModal() {
+  const modal = document.getElementById("statsModal");
+  const content = document.getElementById("statsContent");
+  
+  let totalQuestionsAll = 0;
+  let totalAnsweredAll = 0;
+  let totalCorrectAll = 0;
 
+  Object.keys(courses).forEach(key => {
+    if (key === "weak_pool") return;
+    const c = courses[key];
+    c.sorular.forEach(q => {
+      totalQuestionsAll++;
+      if (userAnswers[q.id]) {
+        totalAnsweredAll++;
+        if (userAnswers[q.id] === q.cevap) totalCorrectAll++;
+      }
+    });
+  });
+
+  const generalSuccess = totalAnsweredAll > 0 ? Math.round((totalCorrectAll / totalAnsweredAll) * 100) : 0;
+
+  content.innerHTML = `
+    <div class="grid grid-cols-2 gap-3">
+      <div class="p-3 rounded-xl bg-slate-50 border">
+        <div class="text-slate-500">Toplam Soru Havuzu</div>
+        <div class="text-lg font-extrabold text-slate-900">${totalQuestionsAll}</div>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 border">
+        <div class="text-slate-500">Çözülen Soru</div>
+        <div class="text-lg font-extrabold text-blue-900">${totalAnsweredAll}</div>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 border">
+        <div class="text-slate-500">Doğru Sayısı</div>
+        <div class="text-lg font-extrabold text-emerald-700">${totalCorrectAll}</div>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 border">
+        <div class="text-slate-500">Genel Başarı Oranı</div>
+        <div class="text-lg font-extrabold text-amber-600">${generalSuccess}%</div>
+      </div>
+    </div>
+    <p class="text-[11px] text-slate-500 mt-2">💡 İpucu: Yanlış yaptığınız sorular otomatik olarak "Zayıf Sorularım" sekmesinde toplanır.</p>
+  `;
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+
+function closeStatsModal() {
+  document.getElementById("statsModal").classList.add("hidden");
+  document.getElementById("statsModal").classList.remove("flex");
+}
 function closePopupQuestion() {
   const popupModal = document.getElementById("popupQuestionModal");
   popupModal.classList.add("hidden");
@@ -1566,5 +1620,20 @@ if ('serviceWorker' in navigator) {
       </div>
     </div>
   </footer>
+  <!-- İstatistikler Modalı -->
+<div id="statsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-xs text-slate-800">
+    <div class="flex items-center justify-between border-b pb-3">
+      <h3 class="font-extrabold text-base text-slate-900">Genel Çalışma İstatistikleri</h3>
+      <button onclick="closeStatsModal()" class="text-slate-400 hover:text-slate-900 text-xl font-bold">&times;</button>
+    </div>
+    <div id="statsContent" class="space-y-3 font-medium">
+      <!-- Dinamik olarak doldurulacak -->
+    </div>
+    <div class="flex justify-end pt-2">
+      <button onclick="closeStatsModal()" class="px-4 py-2 rounded-lg bg-slate-900 text-white font-bold">Kapat</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
