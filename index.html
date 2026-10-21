@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AUZEF Tarih Lisans - Çok Dersli İnteraktif Vize Soru Bankası</title>
 <!-- PWA / Mobil Manifest ve Kurulum Ayarları -->
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22AUZEF%20Soru%20Bankas%C4%B1%22%2C%22short_name%22%3A%22AUZEF%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
+  <link rel="manifest" href="./manifest.json">%7B%22name%22%3A%22AUZEF%20Soru%20Bankas%C4%B1%22%2C%22short_name%22%3A%22AUZEF%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1407,6 +1407,13 @@ function installPWAApp() {
   } else {
     alert("Cihazınız veya tarayıcınız bu yolla yüklemeyi desteklemiyor olabilir. Tarayıcı menüsünden (üç nokta) 'Ana Ekrana Ekle' seçeneğini kullanabilirsiniz.");
   }
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker başarıyla kaydedildi:', reg.scope))
+      .catch(err => console.log('Service Worker kaydı başarısız:', err));
+  });
 }
 </script>
 <!-- 1. Hatırlatıcı Ayar Modalı -->
