@@ -1136,7 +1136,7 @@ function importCustomCourse() {
     }
     const key = parsed.ders_kodu || "ders_" + Date.now();
     const formattedQuestions = parsed.sorular.map((q, idx) => ({
-      id: q.id || `${key}_${idx + 1}`,
+      id: q.id || `${key}_${Date.now()}_${idx + 1}`,
       no: q.no || q.id || idx + 1,
       bolum: q.bolum || "Genel",
       soru: q.soru,
@@ -1144,12 +1144,16 @@ function importCustomCourse() {
       cevap: q.cevap || q.dogru_cevap || "A"
     }));
 
-    courses[key] = {
-      ders_kodu: key,
-      ders_adi: parsed.ders_adi,
-      kisa_ad: parsed.kisa_ad || parsed.ders_adi.slice(0, 22),
-      sorular: formattedQuestions
-    };
+    if (courses[key]) {
+      courses[key].sorular = [...courses[key].sorular, ...formattedQuestions];
+    } else {
+      courses[key] = {
+        ders_kodu: key,
+        ders_adi: parsed.ders_adi,
+        kisa_ad: parsed.kisa_ad || parsed.ders_adi.slice(0, 22),
+        sorular: formattedQuestions
+      };
+    }
 
     // Özel dersleri kaydet
     const savedCustom = JSON.parse(localStorage.getItem("auzef_custom_courses_v2") || "{}");
