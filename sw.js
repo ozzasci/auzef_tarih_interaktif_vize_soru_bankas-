@@ -1,4 +1,4 @@
-const CACHE_NAME = 'auzef-tarih-v1';
+const CACHE_NAME = 'auzef-tarih-v2'; // v1 yerine v2 veya v3 yapabilirsiniz
 const assetsToCache = [
   './index.html',
   'https://cdn.tailwindcss.com',
