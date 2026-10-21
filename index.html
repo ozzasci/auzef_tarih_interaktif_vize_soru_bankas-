@@ -1047,14 +1047,24 @@ function renderPaletteAndStats() {
   const total = activePool.length;
   const answeredCount = correct + wrong;
   const empty = total - answeredCount;
-  const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  // 3 Yanlış 1 Doğruyu Götürür Hesaplaması
+  let netCorrect = correct - (wrong / 3);
+  if (netCorrect < 0) netCorrect = 0;
+
+  // 100 Üzerinden Puanlama (Aktif havuzdaki soru sayısına göre oran)
+  let score = 0;
+  if (total > 0) {
+    score = Math.round((netCorrect / total) * 100);
+    if (score < 0) score = 0;
+  }
 
   document.getElementById("statTotal").innerText = total;
   document.getElementById("statCorrect").innerText = correct;
   document.getElementById("statWrong").innerText = wrong;
   document.getElementById("statEmpty").innerText = empty;
-  document.getElementById("statPercent").innerText = `${percent}%`;
-  document.getElementById("statScore").innerText = percent;
+  document.getElementById("statPercent").innerText = `${netCorrect.toFixed(2)} Net`;
+  document.getElementById("statScore").innerText = score;
   document.getElementById("progressBar").style.width = total > 0 ? `${(answeredCount / total) * 100}%` : "0%";
 
   const wrongBtn = document.getElementById("wrongFilterBtn");
@@ -1522,5 +1532,19 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 </div>
+  <!-- Telif ve İletişim Alt Bilgisi (Footer) -->
+  <footer class="bg-slate-900 text-slate-400 py-4 mt-auto border-t border-slate-800 text-center text-xs">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>
+        <p class="font-semibold text-slate-300">OZZ - 2026 Tüm Hakları Saklıdır.</p>
+        <p class="text-[11px] text-slate-500">AUZEF İnteraktif Vize Hazırlık ve Soru Bankası Platformu</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="https://wa.me/905309082276" target="_blank" class="text-amber-400 hover:underline font-bold flex items-center gap-1">
+          <span>💬 WhatsApp Destek: 0530 908 22 76</span>
+        </a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
