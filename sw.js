@@ -1,4 +1,4 @@
-const CACHE_NAME = 'auzef-tarih-v2'; // Versiyonu güncelledik
+const CACHE_NAME = 'auzef-tarih-v2.1'; // Versiyonu güncelledik
 const assetsToCache = [
   './',
   './index.html',
