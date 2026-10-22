@@ -468,21 +468,21 @@ function resetProgress() {
   const course = courses[activeCourseKey];
   if (!course) return;
 
-  // 1. Sadece aktif dersteki soruların kullanıcı cevaplarını hafızadan ve LocalStorage'dan sil
+  // 1. Aktif dersteki tüm soruların kullanıcı cevaplarını hafızadan ve LocalStorage'dan temizle
   course.sorular.forEach(q => {
     delete userAnswers[q.id];
   });
 
-  // 2. Eğer özel olarak "Zayıf Sorularım" (weak_pool) temizleniyorsa veya genel sıfırlama yapılıyorsa
+  // Eğer "Zayıf Sorularım" sekmesindeysek havuzu sıfırla
   if (activeCourseKey === "weak_pool") {
     courses["weak_pool"].sorular = [];
   }
 
   saveAnswersState();
 
-  // 3. Arayüzü, sayaçları, şıkları ve soru paletini tamamen ilk haline döndür
+  // 2. İndeksi başa al ve filtreleri/görünümü yeniden tetikle
   currentIndex = 0;
-  applyFilters(); // Havuzu ve filtreleri yeniden tetikle
+  applyFilters();
 }
 
 function renderSingleQuestion() {
