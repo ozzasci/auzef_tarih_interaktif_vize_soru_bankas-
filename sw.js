@@ -1,4 +1,4 @@
-const CACHE_NAME = 'auzef-tarih-v2.4';
+const CACHE_NAME = 'auzef-tarih-v2.5';
 const assetsToCache = [
   './',
   './index.html',
