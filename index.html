@@ -35,7 +35,6 @@
         </div>
       </div>
 
-      <!-- Kısaltılmış Üst Butonlar -->
       <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
         <button onclick="openAddCourseModal()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-[11px] sm:text-xs font-semibold text-white transition flex items-center gap-1 shadow-sm" title="JSON Ders Ekle">
           <span>+ JSON</span>
@@ -43,18 +42,18 @@
         <button id="installAppBtn" onclick="installPWAApp()" class="hidden px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-[11px] sm:text-xs font-bold text-white transition flex items-center gap-1 shadow-sm" title="Uygulamayı Yükle">
           <span>📲 Yükle</span>
         </button>
-        <button onclick="openReminderModal()" id="reminderHeaderBtn" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] sm:text-xs font-extrabold transition flex items-center gap-1 shadow-sm" title="Hatırlatıcı">
+        <button onclick="openReminderModal()" id="reminderHeaderBtn" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] sm:text-xs font-extrabold transition flex items-center gap-1 shadow-sm" title="Hatırlatıcı & Koç">
           <span>🔔 Hatırlat</span>
           <span id="reminderTimerBadge" class="hidden px-1 py-0.5 rounded bg-slate-900 text-amber-400 font-mono text-[9px]">00:00</span>
         </button>
-        <button onclick="openJsonModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] sm:text-xs font-semibold border border-slate-700 transition" title="JSON Verisini Gör ve Düzenle">
-          JSON Veri
+        <button onclick="openJsonModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] sm:text-xs font-semibold border border-slate-700 transition" title="JSON Verisini Gör">
+          JSON Verisi
         </button>
         <button onclick="resetProgress()" class="px-2.5 py-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-600 text-[11px] sm:text-xs font-semibold transition" title="İlerlemeni Sıfırla">
           Sıfırla
         </button>
         <button onclick="openStatsModal()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[11px] sm:text-xs font-bold text-white transition shadow-sm" title="İstatistikler">
-          📊 Analiz
+          📊 İstatistik
         </button>
       </div>
     </div>
@@ -86,19 +85,18 @@
             <button id="modeListBtn" onclick="setViewMode('list')" class="py-1.5 text-xs font-bold rounded-md text-slate-600">Liste Modu</button>
           </div>
         </div>
-        <!-- Kısaltılmış Aksiyon Butonları -->
         <div class="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
-          <button onclick="startRandomExam()" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition shadow-sm" title="Rastgele 20 Soru Vize">
-            🎲 20?
+          <button onclick="startRandomExam()" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition shadow-sm" title="Rastgele 20 Soru">
+            🎲 20 Soru
           </button>
           <button onclick="startExamSimulation()" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-purple-700 text-white hover:bg-purple-600 shadow-sm flex items-center gap-1.5" title="Süreli Sınav Simülasyonu">
-            <span>⏱️ Sınav Mod</span>
+            <span>⏱️ Sınav Modu</span>
           </button>
           <button onclick="shuffleActiveQuestions()" class="px-2.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-sm" title="Soruları Karıştır">
             Karıştır
           </button>
           <button onclick="selectWeakCourse()" class="px-3 py-2 rounded-lg transition bg-rose-900 text-rose-100 hover:bg-rose-800 shadow-sm font-bold text-xs flex items-center gap-1" title="Zayıf / Yanlış Sorularım">
-            <span>📌 Zayıf</span>
+            <span>📌 Zayıf Sorular</span>
           </button>
         </div>
       </div>
@@ -205,7 +203,6 @@
         <span id="copyStatus" class="font-bold text-emerald-700"></span>
       </div>
 
-      <!-- Düzenlenebilir JSON Alanı -->
       <div class="p-4 flex-1 flex flex-col overflow-hidden">
         <label class="block text-[11px] font-bold text-slate-500 mb-1">Aşağıdaki JSON metnini doğrudan düzenleyip "Kaydet" diyerek güncelleyebilirsiniz:</label>
         <textarea id="editableJsonOutput" class="w-full flex-1 p-3 text-xs font-mono text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none custom-scroll"></textarea>
@@ -256,57 +253,68 @@
     </div>
   </div>
 
+  <!-- Hatırlatıcı ve Koçluk Modalı (Özel Saat ve Özel Ses Özellikli) -->
   <div id="reminderSettingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
       <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-lg">🔔</span>
           <div>
-            <h3 class="font-bold text-sm sm:text-base">Akıllı Soru Hatırlatıcı</h3>
-            <p class="text-[11px] text-slate-300">Koçluk ve serilerle desteklenmiş vize hatırlatıcısı</p>
+            <h3 class="font-bold text-sm sm:text-base">Akıllı Soru Hatırlatıcı & Koç</h3>
+            <p class="text-[11px] text-slate-300">Belirli saatte 10 soruluk deneme bildirimi</p>
           </div>
         </div>
         <button onclick="closeReminderModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
       </div>
 
       <div class="p-5 space-y-3.5 text-xs">
+        <!-- Zamanlayıcı Aralığı / Sıklık -->
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Bildirim Sıklığı</label>
+          <label class="block font-bold text-slate-700 mb-1">Hatırlatıcı Sıklığı (Aralıklı Tekrar)</label>
           <select id="reminderIntervalSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-800">
-            <option value="30">Her 30 Saniyede Bir</option>
-            <option value="60">Her 1 Dakikada Bir</option>
-            <option value="180">Her 3 Dakikada Bir</option>
+            <option value="60">Her 1 Dakikada Bir (Test)</option>
             <option value="300" selected>Her 5 Dakikada Bir</option>
-            <option value="600">Her 10 Dakikada Bir</option>
+            <option value="900">Her 15 Dakikada Bir</option>
+            <option value="1800">Her 30 Dakikada Bir</option>
+            <option value="3600">Her 1 Saatte Bir</option>
+          </select>
+        </div>
+
+        <!-- YENİ: Belirli Saatte Bildirim / Günlük Hedef Saati -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">⏰ Belirli Saatte Günlük Deneme Saati</label>
+          <div class="flex items-center gap-2">
+            <input type="time" id="targetDailyTimeInput" value="20:00" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-800" />
+            <span class="text-[11px] text-slate-500">Bu saatte "10 soru hazırladım, çözmek ister misin?" bildirimi gelir.</span>
+          </div>
+        </div>
+
+        <!-- YENİ: Özel Bildirim Sesi Seçimi -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">🎵 Bildirim Ses Efekti</label>
+          <select id="customSoundSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-800">
+            <option value="bell">Çan Sesi (Klasik)</option>
+            <option value="chime">Özel Melodi (Yumuşak Çınlama)</option>
+            <option value="digital">Dijital Alarm</option>
+            <option value="none">Sadece Sessiz / Titreşim</option>
           </select>
         </div>
 
         <div>
           <label class="block font-bold text-slate-700 mb-1">Soru Havuzu ve Akıllı Mod</label>
           <select id="reminderSourceSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-800">
-            <option value="SMART_WEAK">🧠 Akıllı Mod (Yanlış/Zayıf Sorular)</option>
+            <option value="SMART_WEAK">🧠 Akıllı Mod (Yanlış/Zayıf Sorulara Ağırlık Ver)</option>
+            <option value="TEN_QUESTIONS">🎯 10 Soruluk Özel Mini Deneme Hazırla</option>
             <option value="ALL_COURSES">Tüm Derslerden Karışık</option>
-            <option value="ACTIVE_COURSE">Sadece Açık Olan Dersten</option>
           </select>
         </div>
 
         <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
           <div>
             <div class="font-bold text-slate-800">Masaüstü Bildirimi</div>
-            <div class="text-[10px] text-slate-500">Sekme arkadayken bildir</div>
+            <div class="text-[10px] text-slate-500">Sekme arkadayken bildirim atar</div>
           </div>
           <button onclick="requestSystemNotificationPermission()" id="notifPermBtn" class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-800 font-bold text-[11px]">İzin Ver</button>
-        </div>
-
-        <div class="space-y-2 pt-1">
-          <div class="flex items-center gap-2">
-            <input type="checkbox" id="reminderSoundCheck" checked class="w-4 h-4 rounded text-blue-600" />
-            <label for="reminderSoundCheck" class="font-semibold text-slate-700">Bildirim sesi çal</label>
-          </div>
-          <div class="flex items-center gap-2">
-            <input type="checkbox" id="reminderVibrateCheck" checked class="w-4 h-4 rounded text-blue-600" />
-            <label for="reminderVibrateCheck" class="font-semibold text-slate-700">Titreşim uygula</label>
-          </div>
         </div>
 
         <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
@@ -321,27 +329,28 @@
       <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex justify-between items-center">
         <button onclick="stopReminderTimer()" id="stopReminderBtn" class="px-3.5 py-2 rounded-lg bg-rose-600 text-white font-bold text-xs hidden">Durdur</button>
         <div class="flex gap-2 ml-auto">
-          <button onclick="triggerPopupQuestionNow()" class="px-3 py-2 rounded-lg bg-amber-100 text-amber-900 font-bold text-xs">Test Et</button>
-          <button onclick="startReminderTimer()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">Başlat</button>
+          <button onclick="trigger10QuestionQuizModal()" class="px-3 py-2 rounded-lg bg-purple-100 text-purple-900 font-bold text-xs" title="10 Soruluk Testi Hemen Başlat">10 Soru Test Et</button>
+          <button onclick="startReminderTimer()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">Koçu Başlat</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- 10 Soruluk Mini Deneme veya Soru Bildirim Modalı -->
   <div id="popupQuestionModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border-2 border-amber-400">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border-2 border-amber-400 flex flex-col max-h-[90vh]">
       <div class="px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="text-lg">🔔</span>
+          <span class="text-lg">🎯</span>
           <div>
-            <h4 class="font-extrabold text-xs uppercase tracking-wider">Aralıklı Tekrar Vakti!</h4>
+            <h4 class="font-extrabold text-xs uppercase tracking-wider" id="popupModalHeaderTitle">Sınav Koçu Soru Vakti!</h4>
             <p id="popupCourseTitle" class="text-[11px] font-semibold text-slate-900"></p>
           </div>
         </div>
         <span class="px-2 py-0.5 rounded-full bg-slate-900 text-amber-400 font-bold text-[10px]" id="popupSectionBadge"></span>
       </div>
 
-      <div class="p-4 sm:p-5">
+      <div class="p-4 sm:p-5 overflow-y-auto flex-1">
         <p id="popupQuestionText" class="font-bold text-slate-800 text-xs sm:text-sm leading-relaxed mb-3"></p>
         <div id="popupOptionsList" class="space-y-2"></div>
         <div id="popupFeedbackBox" class="hidden mt-3 p-2.5 rounded-xl text-xs font-semibold"></div>
@@ -350,7 +359,7 @@
       <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
         <button onclick="snoozeReminder()" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold">⏰ 5 Dk Ertele</button>
         <div class="flex gap-2">
-          <button onclick="triggerPopupQuestionNow()" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold">Başka Soru</button>
+          <button id="popupNextBtn" onclick="nextPopupQuestion()" class="hidden px-3.5 py-1.5 rounded-lg bg-blue-900 text-white font-bold">Sonraki Soru →</button>
           <button onclick="closePopupQuestion()" class="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white font-bold">Kapat</button>
         </div>
       </div>
@@ -449,6 +458,13 @@ let remainingSec = 0;
 let reminderTimerId = null;
 let currentPopupQuestion = null;
 
+// 10 Soruluk Koçluk Deneme Modu Değişkenleri
+let is10QuestionQuizMode = false;
+let quizQuestionsList = [];
+let quizCurrentIdx = 0;
+let quizCorrectCount = 0;
+let quizWrongCount = 0;
+
 function loadSavedState() {
   try {
     const savedAns = localStorage.getItem("auzef_tarih_answers_v2");
@@ -507,35 +523,27 @@ function saveJsonChanges() {
     if (typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("Geçerli bir ders objesi formatında olmalıdır.");
     }
-
     courses = parsed;
-
     const savedCustom = {};
-    Object.keys(courses).forEach(key => {
-      savedCustom[key] = courses[key];
-    });
+    Object.keys(courses).forEach(key => { savedCustom[key] = courses[key]; });
     localStorage.setItem("auzef_custom_courses_v2", JSON.stringify(savedCustom));
-
-    alert("✓ Tüm değişiklikler ve eklemeler başarıyla kaydedildi!");
+    alert("✓ Değişiklikler başarıyla kaydedildi!");
     closeJsonModal();
     renderCourseTabs();
     selectCourse(activeCourseKey);
   } catch (err) {
-    alert("JSON Format Hatası: " + err.message + "\nLütfen sözdizimini kontrol edin.");
+    alert("JSON Format Hatası: " + err.message);
   }
 }
 
 function deleteActiveCourse() {
   const courseName = courses[activeCourseKey]?.ders_adi || activeCourseKey;
-  if (!confirm(`"${courseName}" dersini ve içindeki tüm soruları silmek istediğinize emin misiniz?`)) {
-    return;
-  }
+  if (!confirm(`"${courseName}" dersini ve içindeki tüm soruları silmek istediğinize emin misiniz?`)) return;
 
   if (activeCourseKey === "weak_pool") {
     delete courses["weak_pool"];
   } else {
     delete courses[activeCourseKey];
-    
     const savedCustom = JSON.parse(localStorage.getItem("auzef_custom_courses_v2") || "{}");
     if (savedCustom[activeCourseKey]) {
       delete savedCustom[activeCourseKey];
@@ -550,9 +558,8 @@ function deleteActiveCourse() {
     courses = { ...defaultCourses };
     selectCourse("iktisat");
   }
-
   closeJsonModal();
-  alert("Ders sistemden başarıyla silindi.");
+  alert("Ders silindi.");
 }
 
 function renderCourseTabs() {
@@ -928,6 +935,7 @@ function renderPaletteAndStats() {
 }
 
 function renderAll() {
+  if (is10QuestionQuizMode) return; // 10 soruluk modda ana ekranı render etme
   if (viewMode === "single") renderSingleQuestion();
   else renderListQuestions();
   renderPaletteAndStats();
@@ -1064,28 +1072,44 @@ function requestSystemNotificationPermission() {
   Notification.requestPermission().then(() => updateNotifPermissionButton());
 }
 
+// ÖZEL SES VE BİLDİRİM EFEKTLERİ
 function playNotificationEffects() {
-  if (document.getElementById("reminderSoundCheck")?.checked) {
+  const soundType = document.getElementById("customSoundSelect")?.value || "bell";
+  if (soundType !== "none") {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+      
+      if (soundType === "bell") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+      } else if (soundType === "chime") {
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+      } else { // digital alarm
+        osc.type = "square";
+        osc.frequency.setValueAtTime(900, ctx.currentTime);
+        osc.frequency.setValueAtTime(1200, ctx.currentTime + 0.1);
+      }
+
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.45);
+      osc.stop(ctx.currentTime + 0.5);
     } catch (e) {}
   }
+
   if (document.getElementById("reminderVibrateCheck")?.checked && "vibrate" in navigator) {
     try { navigator.vibrate([200, 100, 200]); } catch (e) {}
   }
 }
 
+// ZAMANLAYICI VE BELİRLİ SAATTE BİLDİRİM KONTROLÜ
 function startReminderTimer() {
   reminderIntervalSec = parseInt(document.getElementById("reminderIntervalSelect").value, 10);
   remainingSec = reminderIntervalSec;
@@ -1097,6 +1121,18 @@ function startReminderTimer() {
   closeReminderModal();
 
   reminderTimerId = setInterval(() => {
+    // Belirli saat kontrolü (Örn: 20:00)
+    const targetTimeStr = document.getElementById("targetDailyTimeInput")?.value;
+    if (targetTimeStr) {
+      const now = new Date();
+      const currentHm = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+      if (currentHm === targetTimeStr && !window._dailyNotifiedToday) {
+        window._dailyNotifiedToday = true;
+        trigger10QuestionQuizModal();
+        return;
+      }
+    }
+
     if (!document.getElementById("popupQuestionModal").classList.contains("hidden")) return;
     remainingSec--;
     updateTimerBadgeText();
@@ -1121,54 +1157,45 @@ function updateTimerBadgeText() {
   document.getElementById("reminderTimerBadge").innerText = `${mins}:${secs}`;
 }
 
-function pickRandomReminderQuestion() {
-  const sourceMode = document.getElementById("reminderSourceSelect")?.value || "SMART_WEAK";
+// 10 SORULUK ÖZEL DENEME KOÇLUK SİSTEMİ
+function trigger10QuestionQuizModal() {
+  closeReminderModal();
   let candidatePool = [];
 
-  if (sourceMode === "SMART_WEAK") {
-    Object.keys(courses).forEach(key => {
-      if (key === "weak_pool") return;
-      courses[key].sorular.forEach(q => {
-        const isWrong = userAnswers[q.id] && userAnswers[q.id] !== q.cevap;
-        const isUnsolved = !userAnswers[q.id];
-        if (isWrong) {
-          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
-          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
-          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
-        } else if (isUnsolved) {
-          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
-          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
-        } else {
-          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
-        }
-      });
+  Object.keys(courses).forEach(key => {
+    if (key === "weak_pool") return;
+    courses[key].sorular.forEach(q => {
+      candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
     });
-  } else if (sourceMode === "ACTIVE_COURSE") {
-    const c = courses[activeCourseKey];
-    candidatePool = c.sorular.map(q => ({ ...q, ders_adi: c.ders_adi }));
-  } else {
-    Object.values(courses).forEach(c => {
-      c.sorular.forEach(q => { candidatePool.push({ ...q, ders_adi: c.ders_adi }); });
-    });
+  });
+
+  if (candidatePool.length === 0) {
+    alert("Soru havuzunda soru bulunamadı!");
+    return;
   }
 
-  if (candidatePool.length === 0) return null;
-  return candidatePool[Math.floor(Math.random() * candidatePool.length)];
-}
+  // Rastgele 10 soru seç
+  quizQuestionsList = candidatePool.sort(() => Math.random() - 0.5).slice(0, 10);
+  quizCurrentIdx = 0;
+  quizCorrectCount = 0;
+  quizWrongCount = 0;
+  is10QuestionQuizMode = true;
 
-function triggerPopupQuestionNow() {
-  closeReminderModal();
-  const q = pickRandomReminderQuestion();
-  if (!q) return;
-
-  currentPopupQuestion = q;
   playNotificationEffects();
 
   if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
-    const n = new Notification(`🔔 ${q.ders_adi} - Soru Vakti!`, { body: q.soru });
+    const n = new Notification(`🎯 Sınav Koçu - 10 Soruluk Deneme Vakti!`, { body: "Senin için hazırladığım 10 soruluk testi çözmek ister misin?" });
     n.onclick = () => { window.focus(); n.close(); };
   }
 
+  renderQuizModalQuestion();
+  document.getElementById("popupQuestionModal").classList.remove("hidden");
+  document.getElementById("popupQuestionModal").classList.add("flex");
+}
+
+function renderQuizModalQuestion() {
+  const q = quizQuestionsList[quizCurrentIdx];
+  document.getElementById("popupModalHeaderTitle").innerText = `🎯 10 Soruluk Deneme (${quizCurrentIdx + 1}/10)`;
   document.getElementById("popupCourseTitle").innerText = q.ders_adi;
   document.getElementById("popupSectionBadge").innerText = q.bolum;
   document.getElementById("popupQuestionText").innerText = q.soru;
@@ -1176,26 +1203,28 @@ function triggerPopupQuestionNow() {
   const optsContainer = document.getElementById("popupOptionsList");
   optsContainer.innerHTML = "";
   document.getElementById("popupFeedbackBox").classList.add("hidden");
+  document.getElementById("popupNextBtn").classList.add("hidden");
 
   for (const [key, val] of Object.entries(q.siklar)) {
     const btn = document.createElement("button");
     btn.id = `popup_opt_${key}`;
     btn.className = "option-btn w-full text-left p-2.5 rounded-xl border-2 border-slate-200 bg-white flex items-start gap-2 text-xs sm:text-sm text-slate-800";
     btn.innerHTML = `<span class="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">${key}</span><span class="pt-0.5">${val}</span>`;
-    btn.onclick = () => answerPopupQuestion(key);
+    btn.onclick = () => answerQuizModalQuestion(key);
     optsContainer.appendChild(btn);
   }
-
-  document.getElementById("popupQuestionModal").classList.remove("hidden");
-  document.getElementById("popupQuestionModal").classList.add("flex");
 }
 
-function answerPopupQuestion(selectedKey) {
-  const q = currentPopupQuestion;
+function answerQuizModalQuestion(selectedKey) {
+  const q = quizQuestionsList[quizCurrentIdx];
   if (!q) return;
+
+  const isCorrect = selectedKey === q.cevap;
+  if (isCorrect) quizCorrectCount++;
+  else quizWrongCount++;
+
   userAnswers[q.id] = selectedKey;
   saveAnswersState();
-  renderAll();
   updateStreakOnAnswer();
 
   for (const key of Object.keys(q.siklar)) {
@@ -1203,14 +1232,56 @@ function answerPopupQuestion(selectedKey) {
     if (!btn) continue;
     btn.disabled = true;
     if (key === q.cevap) btn.classList.add("option-correct");
-    else if (key === selectedKey && selectedKey !== q.cevap) btn.classList.add("option-wrong");
+    else if (key === selectedKey && !isCorrect) btn.classList.add("option-wrong");
   }
 
   const feedbackBox = document.getElementById("popupFeedbackBox");
-  const isCorrect = selectedKey === q.cevap;
   feedbackBox.className = `mt-3 p-2.5 rounded-xl text-xs font-semibold ${isCorrect ? "bg-emerald-50 text-emerald-900 border border-emerald-200" : "bg-rose-50 text-rose-900 border border-rose-200"}`;
-  feedbackBox.innerHTML = isCorrect ? `✓ Doğru! Harika gidiyorsun.` : `✗ Yanlış. Doğru seçenek: ${q.cevap}) ${q.siklar[q.cevap]}`;
+  feedbackBox.innerHTML = isCorrect ? `✓ Doğru!` : `✗ Yanlış. Doğru seçenek: ${q.cevap}) ${q.siklar[q.cevap]}`;
   feedbackBox.classList.remove("hidden");
+
+  if (quizCurrentIdx < quizQuestionsList.length - 1) {
+    document.getElementById("popupNextBtn").classList.remove("hidden");
+  } else {
+    // Test bitti karnesini göster
+    setTimeout(() => {
+      showQuizCompletionReport();
+    }, 1200);
+  }
+}
+
+function nextPopupQuestion() {
+  quizCurrentIdx++;
+  renderQuizModalQuestion();
+}
+
+function showQuizCompletionReport() {
+  is10QuestionQuizMode = false;
+  let net = quizCorrectCount - (quizWrongCount / 3);
+  if (net < 0) net = 0;
+  let score = Math.round((net / 10) * 100);
+
+  const optsContainer = document.getElementById("popupOptionsList");
+  document.getElementById("popupModalHeaderTitle").innerText = "🏆 10 Soruluk Deneme Sonucu";
+  document.getElementById("popupCourseTitle").innerText = "Koçluk Değerlendirmesi";
+  document.getElementById("popupSectionBadge").innerText = "Tebrikler!";
+  document.getElementById("popupQuestionText").innerHTML = `
+    <div class="space-y-3 py-2 text-xs">
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl"><div class="text-emerald-700 font-bold">Doğru</div><div class="text-base font-extrabold text-emerald-900">${quizCorrectCount}</div></div>
+        <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-xl"><div class="text-rose-700 font-bold">Yanlış</div><div class="text-base font-extrabold text-rose-900">${quizWrongCount}</div></div>
+        <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-xl"><div class="text-blue-700 font-bold">Puan</div><div class="text-base font-extrabold text-blue-900">${score}/100</div></div>
+      </div>
+      <p class="font-semibold text-slate-700 text-center">Harika bir çalışma sergiledin! Günlük serin (streak) güncellendi.</p>
+    </div>
+  `;
+  optsContainer.innerHTML = "";
+  document.getElementById("popupFeedbackBox").classList.add("hidden");
+  document.getElementById("popupNextBtn").classList.add("hidden");
+}
+
+function triggerPopupQuestionNow() {
+  trigger10QuestionQuizModal();
 }
 
 function snoozeReminder() {
@@ -1235,9 +1306,11 @@ function closeReminderModal() {
 }
 
 function closePopupQuestion() {
+  is10QuestionQuizMode = false;
   document.getElementById("popupQuestionModal").classList.add("hidden");
   document.getElementById("popupQuestionModal").classList.remove("flex");
   remainingSec = reminderIntervalSec;
+  applyFilters();
 }
 
 // Sınav Simülasyonu Fonksiyonları
