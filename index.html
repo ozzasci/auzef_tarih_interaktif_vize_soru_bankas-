@@ -375,6 +375,12 @@ function selectWeakCourse() {
     allWrongs = allWrongs.concat(wrongs);
   });
 
+  // Zayıf sorular listesine girildiğinde, bu soruların önceki cevaplarını temizle ki yeniden çözülebilsin
+  allWrongs.forEach(q => {
+    delete userAnswers[q.id];
+  });
+  saveAnswersState();
+
   courses["weak_pool"] = {
     ders_kodu: "weak_pool",
     ders_adi: "Zayıf Olduğum / Yanlış Yaptığım Sorular",
@@ -384,7 +390,6 @@ function selectWeakCourse() {
 
   selectCourse("weak_pool");
 }
-
 function populateSectionFilter() {
   const course = courses[activeCourseKey];
   const select = document.getElementById("sectionFilter");
@@ -431,6 +436,13 @@ function filterWrongOnly() {
   const course = courses[activeCourseKey];
   const wrongs = course.sorular.filter(q => userAnswers[q.id] && userAnswers[q.id] !== q.cevap);
   if (wrongs.length === 0) return;
+
+  // Sadece yanlışları çöz moduna geçildiğinde bu soruların cevaplarını temizle
+  wrongs.forEach(q => {
+    delete userAnswers[q.id];
+  });
+  saveAnswersState();
+
   activePool = wrongs;
   currentIndex = 0;
   renderAll();
