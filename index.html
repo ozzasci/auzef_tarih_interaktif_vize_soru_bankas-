@@ -466,6 +466,93 @@ function saveAnswersState() {
   } catch (e) {}
 }
 
+// JSON Veri Yönetimi Fonksiyonları
+function openJsonModal() {
+  const modal = document.getElementById("jsonModal");
+  document.getElementById("editableJsonOutput").value = JSON.stringify(courses, null, 2);
+  document.getElementById("copyStatus").innerText = "";
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+
+function closeJsonModal() {
+  document.getElementById("jsonModal").classList.add("hidden");
+  document.getElementById("jsonModal").classList.remove("flex");
+}
+
+function copyJsonToClipboard() {
+  const text = document.getElementById("editableJsonOutput").value;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById("copyStatus").innerText = "✓ Kopyalandı!";
+  });
+}
+
+function downloadJsonFile() {
+  const text = document.getElementById("editableJsonOutput").value;
+  const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "auzef_soru_bankasi_guncel.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function saveJsonChanges() {
+  const raw = document.getElementById("editableJsonOutput").value.trim();
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("Geçerli bir ders objesi formatında olmalıdır.");
+    }
+
+    courses = parsed;
+
+    const savedCustom = {};
+    Object.keys(courses).forEach(key => {
+      savedCustom[key] = courses[key];
+    });
+    localStorage.setItem("auzef_custom_courses_v2", JSON.stringify(savedCustom));
+
+    alert("✓ Tüm değişiklikler ve eklemeler başarıyla kaydedildi!");
+    closeJsonModal();
+    renderCourseTabs();
+    selectCourse(activeCourseKey);
+  } catch (err) {
+    alert("JSON Format Hatası: " + err.message + "\nLütfen sözdizimini (süslü parantez, tırnaklar vb.) kontrol edin.");
+  }
+}
+
+function deleteActiveCourse() {
+  const courseName = courses[activeCourseKey]?.ders_adi || activeCourseKey;
+  if (!confirm(`"${courseName}" dersini ve içindeki tüm soruları silmek istediğinize emin misiniz?`)) {
+    return;
+  }
+
+  if (activeCourseKey === "weak_pool") {
+    delete courses["weak_pool"];
+  } else {
+    delete courses[activeCourseKey];
+    
+    const savedCustom = JSON.parse(localStorage.getItem("auzef_custom_courses_v2") || "{}");
+    if (savedCustom[activeCourseKey]) {
+      delete savedCustom[activeCourseKey];
+      localStorage.setItem("auzef_custom_courses_v2", JSON.stringify(savedCustom));
+    }
+  }
+
+  const remainingKeys = Object.keys(courses);
+  if (remainingKeys.length > 0) {
+    selectCourse(remainingKeys[0]);
+  } else {
+    courses = { ...defaultCourses };
+    selectCourse("iktisat");
+  }
+
+  closeJsonModal();
+  alert("Ders sistemden başarıyla silindi.");
+}
+
 function renderCourseTabs() {
   const container = document.getElementById("courseTabs");
   container.innerHTML = "";
