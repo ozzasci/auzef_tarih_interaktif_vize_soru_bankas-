@@ -94,6 +94,9 @@
           <button onclick="startRandomExam()" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition shadow-sm" title="Rastgele 20 Soru">
             🎲 20 Soru Vize
           </button>
+          <button onclick="startExamSimulation()" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-purple-700 text-white hover:bg-purple-600 shadow-sm flex items-center gap-1.5" title="Süreli ve gerçekçi sınav simülasyonu başlatır">
+  <span>⏱️ Sınav Simülasyonu</span>
+</button>
           <button onclick="shuffleActiveQuestions()" class="px-2.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-sm">
             Karıştır
           </button>
@@ -1137,6 +1140,114 @@ function installPWAApp() {
     alert("Tarayıcı menüsünden 'Ana Ekrana Ekle' seçeneğini kullanabilirsiniz.");
   }
 }
+  // ============================================================================
+// SINAV SİMLÜASYONU (DENEME MODU) YÖNETİMİ
+// ============================================================================
+let isExamMode = false;
+let examTimerInterval = null;
+let examSecondsLeft = 0;
+
+function startExamSimulation() {
+  const course = courses[activeCourseKey];
+  if (!course || course.sorular.length === 0) {
+    alert("Bu derste çözülecek soru bulunamadı.");
+    return;
+  }
+
+  // Rastgele 20 soru seç (20'den az varsa hepsini al)
+  const shuffled = [...course.sorular].sort(() => Math.random() - 0.5);
+  activePool = shuffled.slice(0, Math.min(20, shuffled.length));
+  
+  isExamMode = true;
+  currentIndex = 0;
+  
+  // Soru başına 1.5 dakika (20 soru için 30 dakika = 1800 saniye)
+  examSecondsLeft = activePool.length * 90; 
+
+  startExamTimer();
+  renderAll();
+
+  alert(`⏱️ Sınav Simülasyonu Başladı!\n\n- Soru Sayısı: ${activePool.length}\n- Süre: ${Math.floor(examSecondsLeft / 60)} Dakika\n\nNot: Sınav esnasında doğru/yanlışlar gizlidir. Süre bitince veya "Sınavı Bitir" butonuna basınca karneniz gösterilecektir.`);
+}
+
+function startExamTimer() {
+  if (examTimerInterval) clearInterval(examTimerInterval);
+  
+  const timerBadge = document.getElementById("reminderTimerBadge");
+  timerBadge.classList.remove("hidden");
+
+  examTimerInterval = setInterval(() => {
+    examSecondsLeft--;
+    
+    const mins = String(Math.floor(examSecondsLeft / 60)).padStart(2, "0");
+    const secs = String(examSecondsLeft % 60).padStart(2, "0");
+    timerBadge.innerText = `⏱️ ${mins}:${secs}`;
+
+    if (examSecondsLeft <= 0) {
+      clearInterval(examTimerInterval);
+      alert("Süre doldu! Sınavınız otomatik olarak sonlandırılıyor.");
+      finishExamSimulation();
+    }
+  }, 1000);
+}
+
+function finishExamSimulation() {
+  if (!isExamMode && !confirm("Sınavı bitirmek istediğinize emin misiniz?")) return;
+  if (examTimerInterval) clearInterval(examTimerInterval);
+  document.getElementById("reminderTimerBadge").classList.add("hidden");
+
+  let correct = 0;
+  let wrong = 0;
+  let empty = 0;
+
+  activePool.forEach(q => {
+    const ans = userAnswers[q.id];
+    if (!ans) {
+      empty++;
+    } else if (ans === q.cevap) {
+      correct++;
+    } else {
+      wrong++;
+    }
+  });
+
+  let net = correct - (wrong / 3);
+  if (net < 0) net = 0;
+  let score = activePool.length > 0 ? Math.round((net / activePool.length) * 100) : 0;
+  if (score < 0) score = 0;
+
+  isExamMode = false;
+
+  const content = document.getElementById("examResultContent");
+  content.innerHTML = `
+    <div class="grid grid-cols-2 gap-3">
+      <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-slate-500">Toplam Soru</div><div class="text-lg font-extrabold text-slate-900">${activePool.length}</div></div>
+      <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-slate-500">Doğru Sayısı</div><div class="text-lg font-extrabold text-emerald-700">${correct}</div></div>
+      <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-slate-500">Yanlış Sayısı</div><div class="text-lg font-extrabold text-rose-700">${wrong}</div></div>
+      <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-slate-500">Boş Sayısı</div><div class="text-lg font-extrabold text-slate-600">${empty}</div></div>
+    </div>
+    <div class="p-4 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between mt-3">
+      <div>
+        <div class="font-bold text-blue-950">Net Başarı / Puan</div>
+        <div class="text-xs text-blue-700">3 Yanlış 1 Doğruyu Götürür Kuralına Göre</div>
+      </div>
+      <div class="text-right">
+        <div class="text-sm font-extrabold text-blue-900">${net.toFixed(2)} Net</div>
+        <div class="text-base font-extrabold text-amber-600">${score} / 100 Puan</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("examResultModal").classList.remove("hidden");
+  document.getElementById("examResultModal").classList.add("flex");
+  renderAll();
+}
+
+function closeExamResultModal() {
+  document.getElementById("examResultModal").classList.add("hidden");
+  document.getElementById("examResultModal").classList.remove("flex");
+  applyFilters(); // Normal moda dön
+}
 </script>
 <!-- 1. Hatırlatıcı Gelişmiş Ayar Modalı -->
 <div id="reminderSettingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
@@ -1261,7 +1372,21 @@ function installPWAApp() {
     </div>
   </div>
 </div>
-
+<!-- Sınav Simülasyonu Sonuç Modalı -->
+<div id="examResultModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-xs sm:text-sm text-slate-800">
+    <div class="flex items-center justify-between border-b pb-3">
+      <h3 class="font-extrabold text-base sm:text-lg text-slate-900">⏱️ Sınav Simülasyonu Tamamlandı</h3>
+      <button onclick="closeExamResultModal()" class="text-slate-400 hover:text-slate-900 text-xl font-bold">&times;</button>
+    </div>
+    <div id="examResultContent" class="space-y-3 font-medium">
+      <!-- Dinamik sonuçlar buraya gelecek -->
+    </div>
+    <div class="flex justify-end pt-2">
+      <button onclick="closeExamResultModal()" class="px-4 py-2 rounded-lg bg-slate-900 text-white font-bold text-xs">Sonuçları Kapat ve Dön</button>
+    </div>
+  </div>
+</div>
 <!-- Telif ve İletişim Alt Bilgisi (Footer) -->
 <footer class="bg-slate-900 text-slate-400 py-3.5 mt-auto border-t border-slate-800 text-center text-xs">
   <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
