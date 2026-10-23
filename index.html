@@ -365,7 +365,7 @@ function selectCourse(courseKey) {
   applyFilters();
 }
 
-// ZAYIF SORULARIM FONKSİYONU (Doğru konumda ve bağımsız)
+// ZAYIF SORULARIM FONKSİYONU (Önceki cevapları temizler ki yeniden çözülebilsin)
 function selectWeakCourse() {
   let allWrongs = [];
   Object.keys(courses).forEach(key => {
@@ -375,7 +375,6 @@ function selectWeakCourse() {
     allWrongs = allWrongs.concat(wrongs);
   });
 
-  // Zayıf sorular listesine girildiğinde, bu soruların önceki cevaplarını temizle ki yeniden çözülebilsin
   allWrongs.forEach(q => {
     delete userAnswers[q.id];
   });
@@ -390,6 +389,7 @@ function selectWeakCourse() {
 
   selectCourse("weak_pool");
 }
+
 function populateSectionFilter() {
   const course = courses[activeCourseKey];
   const select = document.getElementById("sectionFilter");
@@ -437,7 +437,6 @@ function filterWrongOnly() {
   const wrongs = course.sorular.filter(q => userAnswers[q.id] && userAnswers[q.id] !== q.cevap);
   if (wrongs.length === 0) return;
 
-  // Sadece yanlışları çöz moduna geçildiğinde bu soruların cevaplarını temizle
   wrongs.forEach(q => {
     delete userAnswers[q.id];
   });
@@ -503,19 +502,15 @@ function resetProgress() {
   const course = courses[activeCourseKey];
   if (!course) return;
 
-  // 1. Aktif dersteki tüm soruların kullanıcı cevaplarını hafızadan ve LocalStorage'dan temizle
   course.sorular.forEach(q => {
     delete userAnswers[q.id];
   });
 
-  // Eğer "Zayıf Sorularım" sekmesindeysek havuzu sıfırla
   if (activeCourseKey === "weak_pool") {
     courses["weak_pool"].sorular = [];
   }
 
   saveAnswersState();
-
-  // 2. İndeksi başa al ve filtreleri/görünümü yeniden tetikle
   currentIndex = 0;
   applyFilters();
 }
@@ -752,20 +747,19 @@ function closeAddCourseModal() {
   document.getElementById("addCourseModal").classList.add("hidden");
   document.getElementById("addCourseModal").classList.remove("flex");
 }
-// 1. Cihazdan veya Google Drive'dan seçilen .json dosyasını (veya dosyalarını) okur
+
 function handleJsonFileSelect(event) {
   const files = event.target.files;
   const statusEl = document.getElementById("importStatus");
   if (!files || files.length === 0) return;
 
-  // Eğer tek dosya seçildiyse kutuya doldur ve otomatik kaydet
   if (files.length === 1) {
     const reader = new FileReader();
     reader.onload = function(e) {
       document.getElementById("importJsonInput").value = e.target.result;
       statusEl.className = "font-bold text-xs text-emerald-600";
       statusEl.innerText = `✓ "${files[0].name}" okundu! Kaydediliyor...`;
-      importCustomCourse(); // Otomatik olarak dersi ekler!
+      importCustomCourse();
     };
     reader.onerror = function() {
       statusEl.className = "font-bold text-xs text-rose-600";
@@ -773,7 +767,6 @@ function handleJsonFileSelect(event) {
     };
     reader.readAsText(files[0], "UTF-8");
   } else {
-    // Birden fazla JSON dosyası aynı anda seçildiyse hepsini sırayla yükle
     let loadedCount = 0;
     Array.from(files).forEach(file => {
       const reader = new FileReader();
@@ -791,7 +784,6 @@ function handleJsonFileSelect(event) {
   }
 }
 
-// 2. Uzak bir URL'den (veya GitHub Raw linkinden) JSON verisini çeker
 async function fetchJsonFromUrl() {
   let url = document.getElementById("jsonUrlInput").value.trim();
   const statusEl = document.getElementById("importStatus");
@@ -814,9 +806,10 @@ async function fetchJsonFromUrl() {
     importCustomCourse();
   } catch (err) {
     statusEl.className = "font-bold text-xs text-rose-600";
-    statusEl.innerText = "Linkten çekilemedi (CORS veya erişim engeli olabilir). Lütfen dosyayı indirip 'Dosya Seç' ile yükleyin.";
+    statusEl.innerText = "Linkten çekilemedi (CORS hatası). Lütfen 'Dosya Seç' ile yükleyin.";
   }
 }
+
 function importCustomCourse() {
   const raw = document.getElementById("importJsonInput").value.trim();
   const statusEl = document.getElementById("importStatus");
@@ -863,7 +856,36 @@ function importCustomCourse() {
   }
 }
 
-// Hatırlatıcı, İstatistik ve PWA Fonksiyonları
+// --- GÜNLÜK SERİ (STREAK) YÖNETİMİ ---
+function getStreakData() {
+  try {
+    const data = JSON.parse(localStorage.getItem("auzef_streak_data") || "{}");
+    const today = new Date().toISOString().slice(0, 10);
+    if (!data.lastDate) return { count: 0, lastDate: null };
+    const last = new Date(data.lastDate);
+    const now = new Date(today);
+    const diffTime = Math.abs(now - last);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays > 1) return { count: 0, lastDate: null };
+    return data;
+  } catch (e) {
+    return { count: 0, lastDate: null };
+  }
+}
+
+function updateStreakOnAnswer() {
+  const today = new Date().toISOString().slice(0, 10);
+  let data = getStreakData();
+  if (data.lastDate !== today) {
+    data.count = (data.count || 0) + 1;
+    data.lastDate = today;
+    localStorage.setItem("auzef_streak_data", JSON.stringify(data));
+  }
+  const display = document.getElementById("streakCountDisplay");
+  if (display) display.innerText = `${data.count} Gün`;
+}
+
+// --- AKILLI HATIRLATICI VE HAVUZ SEÇİMİ ---
 let reminderIntervalSec = 300;
 let remainingSec = 0;
 let reminderTimerId = null;
@@ -871,6 +893,9 @@ let currentPopupQuestion = null;
 
 function openReminderModal() {
   updateNotifPermissionButton();
+  const streak = getStreakData();
+  const display = document.getElementById("streakCountDisplay");
+  if (display) display.innerText = `${streak.count || 0} Gün`;
   document.getElementById("reminderSettingsModal").classList.remove("hidden");
   document.getElementById("reminderSettingsModal").classList.add("flex");
 }
@@ -894,22 +919,26 @@ function requestSystemNotificationPermission() {
   Notification.requestPermission().then(() => updateNotifPermissionButton());
 }
 
-function playNotificationChime() {
-  if (!document.getElementById("reminderSoundCheck")?.checked) return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.45);
-  } catch (e) {}
+function playNotificationEffects() {
+  if (document.getElementById("reminderSoundCheck")?.checked) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.45);
+    } catch (e) {}
+  }
+  if (document.getElementById("reminderVibrateCheck")?.checked && "vibrate" in navigator) {
+    try { navigator.vibrate([200, 100, 200]); } catch (e) {}
+  }
 }
 
 function startReminderTimer() {
@@ -948,21 +977,36 @@ function updateTimerBadgeText() {
 }
 
 function pickRandomReminderQuestion() {
-  const sourceMode = document.getElementById("reminderSourceSelect")?.value || "ALL_COURSES";
+  const sourceMode = document.getElementById("reminderSourceSelect")?.value || "SMART_WEAK";
   let candidatePool = [];
 
-  if (sourceMode === "ACTIVE_COURSE") {
+  if (sourceMode === "SMART_WEAK") {
+    Object.keys(courses).forEach(key => {
+      if (key === "weak_pool") return;
+      courses[key].sorular.forEach(q => {
+        const isWrong = userAnswers[q.id] && userAnswers[q.id] !== q.cevap;
+        const isUnsolved = !userAnswers[q.id];
+        if (isWrong) {
+          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
+          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
+          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
+        } else if (isUnsolved) {
+          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
+          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
+        } else {
+          candidatePool.push({ ...q, ders_adi: courses[key].ders_adi });
+        }
+      });
+    });
+  } else if (sourceMode === "ACTIVE_COURSE") {
     const c = courses[activeCourseKey];
     candidatePool = c.sorular.map(q => ({ ...q, ders_adi: c.ders_adi }));
   } else {
     Object.values(courses).forEach(c => {
       c.sorular.forEach(q => { candidatePool.push({ ...q, ders_adi: c.ders_adi }); });
     });
-    if (sourceMode === "UNSOLVED_OR_WRONG") {
-      const filtered = candidatePool.filter(q => !userAnswers[q.id] || userAnswers[q.id] !== q.cevap);
-      if (filtered.length > 0) candidatePool = filtered;
-    }
   }
+
   if (candidatePool.length === 0) return null;
   return candidatePool[Math.floor(Math.random() * candidatePool.length)];
 }
@@ -973,10 +1017,10 @@ function triggerPopupQuestionNow() {
   if (!q) return;
 
   currentPopupQuestion = q;
-  playNotificationChime();
+  playNotificationEffects();
 
   if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
-    const n = new Notification(`🔔 ${q.ders_adi}`, { body: q.soru });
+    const n = new Notification(`🔔 ${q.ders_adi} - Soru Vakti!`, { body: q.soru });
     n.onclick = () => { window.focus(); n.close(); };
   }
 
@@ -1007,6 +1051,7 @@ function answerPopupQuestion(selectedKey) {
   userAnswers[q.id] = selectedKey;
   saveAnswersState();
   renderAll();
+  updateStreakOnAnswer();
 
   for (const key of Object.keys(q.siklar)) {
     const btn = document.getElementById(`popup_opt_${key}`);
@@ -1019,8 +1064,15 @@ function answerPopupQuestion(selectedKey) {
   const feedbackBox = document.getElementById("popupFeedbackBox");
   const isCorrect = selectedKey === q.cevap;
   feedbackBox.className = `mt-3 p-2.5 rounded-xl text-xs font-semibold ${isCorrect ? "bg-emerald-50 text-emerald-900 border border-emerald-200" : "bg-rose-50 text-rose-900 border border-rose-200"}`;
-  feedbackBox.innerHTML = isCorrect ? `✓ Doğru!` : `✗ Yanlış. Doğru: ${q.cevap}) ${q.siklar[q.cevap]}`;
+  feedbackBox.innerHTML = isCorrect ? `✓ Doğru! Harika gidiyorsun.` : `✗ Yanlış. Doğru seçenek: ${q.cevap}) ${q.siklar[q.cevap]}`;
   feedbackBox.classList.remove("hidden");
+}
+
+function snoozeReminder() {
+  closePopupQuestion();
+  remainingSec = 300; // 5 dakika ertele
+  document.getElementById("reminderTimerBadge").classList.remove("hidden");
+  document.getElementById("stopReminderBtn").classList.remove("hidden");
 }
 
 function openStatsModal() {
@@ -1086,56 +1138,112 @@ function installPWAApp() {
   }
 }
 </script>
-
-<!-- Hatırlatıcı Ayar Modalı -->
+<!-- 1. Hatırlatıcı Gelişmiş Ayar Modalı -->
 <div id="reminderSettingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
     <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
-      <h3 class="font-bold text-sm">Periyodik Soru Hatırlatıcı</h3>
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🔔</span>
+        <div>
+          <h3 class="font-bold text-sm sm:text-base">Akıllı Soru Hatırlatıcı</h3>
+          <p class="text-[11px] text-slate-300">Koçluk ve serilerle desteklenmiş vize hatırlatıcısı</p>
+        </div>
+      </div>
       <button onclick="closeReminderModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
     </div>
-    <div class="p-4 space-y-3 text-xs">
+
+    <div class="p-5 space-y-3.5 text-xs">
       <div>
-        <label class="block font-bold text-slate-700 mb-1">Zaman Aralığı</label>
-        <select id="reminderIntervalSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 p-2 font-semibold">
+        <label class="block font-bold text-slate-700 mb-1">Bildirim Sıklığı</label>
+        <select id="reminderIntervalSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-800">
+          <option value="30">Her 30 Saniyede Bir (Hızlı Test)</option>
           <option value="60">Her 1 Dakikada Bir</option>
+          <option value="180">Her 3 Dakikada Bir</option>
           <option value="300" selected>Her 5 Dakikada Bir</option>
           <option value="600">Her 10 Dakikada Bir</option>
         </select>
       </div>
+
       <div>
-        <label class="block font-bold text-slate-700 mb-1">Soru Havuzu</label>
-        <select id="reminderSourceSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 p-2 font-semibold">
-          <option value="ALL_COURSES">Tüm Derslerden Karışık</option>
-          <option value="ACTIVE_COURSE">Sadece Açık Olan Dersten</option>
-          <option value="UNSOLVED_OR_WRONG">Çözülmemiş veya Yanlışlar</option>
+        <label class="block font-bold text-slate-700 mb-1">Soru Havuzu ve Akıllı Mod</label>
+        <select id="reminderSourceSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-800">
+          <option value="SMART_WEAK">🧠 Akıllı Mod: Yanlış/Zayıf Sorulara Ağırlık Ver</option>
+          <option value="ALL_COURSES">Tüm 6 Dersten Karışık</option>
+          <option value="ACTIVE_COURSE">Sadece Şu An Açık Olan Dersten</option>
         </select>
       </div>
+
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+        <div>
+          <div class="font-bold text-slate-800">Masaüstü / Sistem Bildirimi</div>
+          <div class="text-[10px] text-slate-500">Sekme arkadayken bildirim atar</div>
+        </div>
+        <button onclick="requestSystemNotificationPermission()" id="notifPermBtn" class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-800 font-bold text-[11px]">İzin Ver</button>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="reminderSoundCheck" checked class="w-4 h-4 rounded text-blue-600" />
+          <label for="reminderSoundCheck" class="font-semibold text-slate-700">Bildirim sesi çal</label>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="reminderVibrateCheck" checked class="w-4 h-4 rounded text-blue-600" />
+          <label for="reminderVibrateCheck" class="font-semibold text-slate-700">Titreşim uygula (Destekleyen cihazlarda)</label>
+        </div>
+      </div>
+
+      <!-- Günlük Seri / Streak Bilgi Kutusu -->
+      <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+        <div>
+          <div class="font-extrabold text-amber-900">🔥 Günlük Çalışma Serisi</div>
+          <div class="text-[11px] text-amber-700">Hatırlatıcıdan çözülen sorularla artar</div>
+        </div>
+        <div class="text-sm font-extrabold text-amber-900 bg-white px-3 py-1 rounded-lg border border-amber-300 shadow-sm" id="streakCountDisplay">0 Gün</div>
+      </div>
     </div>
-    <div class="px-5 py-3 bg-slate-100 border-t flex justify-between items-center text-xs">
-      <button onclick="stopReminderTimer()" id="stopReminderBtn" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold hidden">Durdur</button>
+
+    <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex justify-between items-center">
+      <button onclick="stopReminderTimer()" id="stopReminderBtn" class="px-3.5 py-2 rounded-lg bg-rose-600 text-white font-bold text-xs hidden">Durdur</button>
       <div class="flex gap-2 ml-auto">
-        <button onclick="triggerPopupQuestionNow()" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-900 font-bold">Hemen Sor</button>
-        <button onclick="startReminderTimer()" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">Başlat</button>
+        <button onclick="triggerPopupQuestionNow()" class="px-3 py-2 rounded-lg bg-amber-100 text-amber-900 font-bold text-xs hover:bg-amber-200">Test Et</button>
+        <button onclick="startReminderTimer()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">Başlat</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Pop-up Soru Modalı -->
+<!-- 2. Gelişmiş Pop-up Soru Modalı (Erteleme Butonlu) -->
 <div id="popupQuestionModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border-2 border-amber-400">
-    <div class="px-4 py-3 bg-amber-400 text-slate-950 flex items-center justify-between font-bold text-xs">
-      <span id="popupCourseTitle">Hatırlatma Sorusu</span>
-      <span id="popupSectionBadge" class="px-2 py-0.5 rounded bg-slate-900 text-amber-400 text-[10px]"></span>
+    <div class="px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🔔</span>
+        <div>
+          <h4 class="font-extrabold text-xs uppercase tracking-wider">Aralıklı Tekrar Vakti!</h4>
+          <p id="popupCourseTitle" class="text-[11px] font-semibold text-slate-900"></p>
+        </div>
+      </div>
+      <span class="px-2 py-0.5 rounded-full bg-slate-900 text-amber-400 font-bold text-[10px]" id="popupSectionBadge"></span>
     </div>
+
     <div class="p-4 sm:p-5">
-      <p id="popupQuestionText" class="font-bold text-slate-800 text-xs sm:text-sm mb-3 leading-relaxed"></p>
+      <p id="popupQuestionText" class="font-bold text-slate-800 text-xs sm:text-sm leading-relaxed mb-3"></p>
       <div id="popupOptionsList" class="space-y-2"></div>
       <div id="popupFeedbackBox" class="hidden mt-3 p-2.5 rounded-xl text-xs font-semibold"></div>
     </div>
-    <div class="px-4 py-3 bg-slate-50 border-t flex justify-end">
-      <button onclick="closePopupQuestion()" class="px-4 py-1.5 rounded-lg bg-slate-900 text-white font-bold text-xs">Kapat ve Devam Et</button>
+
+    <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+      <button onclick="snoozeReminder()" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold">
+        ⏰ 5 Dk Sonra Hatırlat
+      </button>
+      <div class="flex gap-2">
+        <button onclick="triggerPopupQuestionNow()" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold">
+          Başka Soru
+        </button>
+        <button onclick="closePopupQuestion()" class="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold">
+          Kapat
+        </button>
+      </div>
     </div>
   </div>
 </div>
