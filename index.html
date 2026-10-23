@@ -1156,6 +1156,11 @@ function openReminderModal() {
   document.getElementById("reminderSettingsModal").classList.add("flex");
 }
 
+function closeReminderModal() {
+  document.getElementById("reminderSettingsModal").classList.add("hidden");
+  document.getElementById("reminderSettingsModal").classList.remove("flex");
+}
+
 function closePopupQuestion() {
   document.getElementById("popupQuestionModal").classList.add("hidden");
   document.getElementById("popupQuestionModal").classList.remove("flex");
