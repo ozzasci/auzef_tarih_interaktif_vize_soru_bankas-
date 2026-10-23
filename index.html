@@ -531,7 +531,7 @@ function renderSingleQuestion() {
   if (activePool.length === 0) {
     qIndexBadge.innerText = "Soru Yok";
     qSectionBadge.innerText = "-";
-    qText.innerText = "Arama kriterlerinize uygun soru bulunamadı veya Zayıf Sorular listesi boş.";
+    qText.innerText = "Arama kriterlerinize uygun soru bulunamadı.";
     qOptions.innerHTML = "";
     qFeedback.classList.add("hidden");
     footerCounter.innerText = "0 / 0";
@@ -557,17 +557,28 @@ function renderSingleQuestion() {
     btn.className = "option-btn w-full text-left p-3.5 rounded-xl border-2 border-slate-200 bg-white flex items-start gap-3 text-xs sm:text-sm text-slate-800";
 
     let badgeClass = "bg-slate-100 text-slate-700";
-    if (answered) {
-      btn.disabled = true;
-      if (key === q.cevap) {
-        btn.classList.add("option-correct");
-        badgeClass = "bg-emerald-600 text-white";
-      } else if (key === answered && answered !== q.cevap) {
-        btn.classList.add("option-wrong");
-        badgeClass = "bg-rose-600 text-white";
+
+    if (isExamMode) {
+      // SINAV SİMÜLASYONU MODU: Doğru/Yanlış renkleri gizli, sadece seçilen şık mavi/işaretli görünür
+      if (answered === key) {
+        btn.classList.add("border-blue-600", "bg-blue-50/70");
+        badgeClass = "bg-blue-600 text-white";
       }
-    } else {
       btn.onclick = () => selectAnswer(q.id, key);
+    } else {
+      // NORMAL ÇALIŞMA MODU: Anında doğru/yanlış renkleri gösterilir
+      if (answered) {
+        btn.disabled = true;
+        if (key === q.cevap) {
+          btn.classList.add("option-correct");
+          badgeClass = "bg-emerald-600 text-white";
+        } else if (key === answered && answered !== q.cevap) {
+          btn.classList.add("option-wrong");
+          badgeClass = "bg-rose-600 text-white";
+        }
+      } else {
+        btn.onclick = () => selectAnswer(q.id, key);
+      }
     }
 
     btn.innerHTML = `
@@ -577,7 +588,8 @@ function renderSingleQuestion() {
     qOptions.appendChild(btn);
   }
 
-  if (answered) {
+  // Sınav modunda feedback gizlenir, normal modda gösterilir
+  if (!isExamMode && answered) {
     const isCorrect = answered === q.cevap;
     qFeedback.className = `mt-5 p-4 rounded-xl border text-xs sm:text-sm leading-relaxed ${
       isCorrect ? "bg-emerald-50 border-emerald-200 text-emerald-900" : "bg-rose-50 border-rose-200 text-rose-900"
@@ -609,18 +621,25 @@ function renderListQuestions() {
       let extraClass = "border-slate-200 bg-white";
       let badgeClass = "bg-slate-100 text-slate-700";
 
-      if (answered) {
-        if (key === q.cevap) {
-          extraClass = "option-correct";
-          badgeClass = "bg-emerald-600 text-white";
-        } else if (key === answered && answered !== q.cevap) {
-          extraClass = "option-wrong";
-          badgeClass = "bg-rose-600 text-white";
+      if (isExamMode) {
+        if (answered === key) {
+          extraClass = "border-blue-600 bg-blue-50/70";
+          badgeClass = "bg-blue-600 text-white";
+        }
+      } else {
+        if (answered) {
+          if (key === q.cevap) {
+            extraClass = "option-correct";
+            badgeClass = "bg-emerald-600 text-white";
+          } else if (key === answered && answered !== q.cevap) {
+            extraClass = "option-wrong";
+            badgeClass = "bg-rose-600 text-white";
+          }
         }
       }
 
       optionsHtml += `
-        <button ${answered ? "disabled" : ""} onclick="selectAnswer('${q.id}', '${key}')" class="option-btn w-full text-left p-3 rounded-xl border-2 ${extraClass} flex items-start gap-3 text-xs sm:text-sm">
+        <button ${!isExamMode && answered ? "disabled" : ""} onclick="selectAnswer('${q.id}', '${key}')" class="option-btn w-full text-left p-3 rounded-xl border-2 ${extraClass} flex items-start gap-3 text-xs sm:text-sm">
           <span class="w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ${badgeClass}">${key}</span>
           <span class="pt-0.5">${val}</span>
         </button>
